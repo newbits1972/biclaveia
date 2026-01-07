@@ -1,0 +1,85 @@
+import React, { useState } from 'react';
+import { Shield, Users, MessageSquare, Briefcase } from 'lucide-react';
+
+// Definimos los tipos para las pestañas para mejorar la legibilidad y mantenibilidad.
+type AdminTab = 'users' | 'queries' | 'professionals';
+
+const Admin: React.FC = () => {
+  // Estado para controlar la pestaña activa.
+  const [activeTab, setActiveTab] = useState<AdminTab>('users');
+
+  // Componente para el contenido de cada pestaña (placeholders por ahora).
+  const TabContent: React.FC<{ tab: AdminTab }> = ({ tab }) => {
+    let title = '';
+    let description = '';
+    let Icon = Users; // Icono por defecto
+
+    switch (tab) {
+      case 'users':
+        title = 'Gestión de Usuarios';
+        description = 'Aquí podrás ver, buscar y gestionar los perfiles de todos los usuarios registrados en la plataforma.';
+        Icon = Users;
+        break;
+      case 'queries':
+        title = 'Registro de Consultas a la IA';
+        description = 'En esta sección se mostrará un historial de las consultas realizadas al servicio de IA para fines de monitoreo y análisis.';
+        Icon = MessageSquare;
+        break;
+      case 'professionals':
+        title = 'Gestión de Profesionales';
+        description = 'Administra la lista de profesionales: añade nuevos perfiles, edita la información existente o elimina perfiles.';
+        Icon = Briefcase;
+        break;
+    }
+
+    return (
+      <div className="bg-white p-8 rounded-lg shadow">
+        <div className="flex items-center gap-4 mb-4">
+          <Icon className="text-brand-purple" size={28} />
+          <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
+        </div>
+        <p className="text-gray-600">{description}</p>
+        <div className="mt-8 border-2 border-dashed border-gray-200 rounded-lg h-64 flex items-center justify-center">
+          <p className="text-gray-400">Contenido futuro de la sección.</p>
+        </div>
+      </div>
+    );
+  };
+
+  // Función para renderizar los botones de las pestañas.
+  const renderTab = (tab: AdminTab, label: string, Icon: React.ElementType) => {
+    const isActive = activeTab === tab;
+    return (
+      <button
+        onClick={() => setActiveTab(tab)}
+        className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${isActive ? 'bg-brand-purple text-white shadow' : 'text-gray-600 hover:bg-gray-200'}`}>
+        <Icon size={16} />
+        {label}
+      </button>
+    );
+  };
+
+  return (
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Encabezado del Panel */}
+      <div className="flex items-center gap-4 mb-8">
+        <Shield className="text-brand-dark-blue" size={32} />
+        <h1 className="text-3xl font-bold text-gray-800">Panel de Administración</h1>
+      </div>
+
+      {/* Navegación de Pestañas */}
+      <div className="flex space-x-2 border-b border-gray-200 mb-8">
+        {renderTab('users', 'Usuarios', Users)}
+        {renderTab('queries', 'Consultas IA', MessageSquare)}
+        {renderTab('professionals', 'Profesionales', Briefcase)}
+      </div>
+
+      {/* Contenido de la Pestaña Activa */}
+      <div>
+        <TabContent tab={activeTab} />
+      </div>
+    </div>
+  );
+};
+
+export default Admin;

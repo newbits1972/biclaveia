@@ -1,216 +1,102 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { Calendar, Heart, TrendingUp, Plus, BookOpen, Lightbulb, Target } from 'lucide-react';
-import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
-import { db } from '../firebase';
-import { collection, addDoc, query, where, onSnapshot, orderBy, Timestamp } from 'firebase/firestore';
+import { CalendarDays, Heart, TrendingUp, Plus, BookOpen, Lightbulb, CheckCircle2 } from 'lucide-react';
+import React from 'react';
 
-interface JournalEntry {
-  id: string;
-  text: string;
-  createdAt: Timestamp;
+// --- Type Definitions ---
+interface StatCardProps {
+  icon: React.ElementType;
+  label: string;
+  value: number;
+  color: string;
 }
 
-const MyProgress = () => {
-  const { user, isLoggedIn } = useAuth();
-  const [isWriting, setIsWriting] = useState(false);
-  const [newEntryText, setNewEntryText] = useState('');
-  const [entries, setEntries] = useState<JournalEntry[]>([]);
-  const [loadingEntries, setLoadingEntries] = useState(true);
+interface TipItemProps {
+  children: React.ReactNode;
+}
 
-  // --- CONEXIÓN A FIRESTORE ---
-  // Este efecto se ejecuta cuando el usuario está logueado y obtiene
-  // las entradas del diario en tiempo real desde Firestore.
-  useEffect(() => {
-    if (!user) {
-      setEntries([]);
-      setLoadingEntries(false);
-      return;
-    };
+// --- Components ---
 
-    setLoadingEntries(true);
-    const entriesCollection = collection(db, 'journalEntries');
-    const q = query(
-      entriesCollection, 
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc')
-    );
-
-    // onSnapshot crea un listener en tiempo real.
-    // Cada vez que los datos cambian en Firestore, esta función se ejecuta.
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const userEntries: JournalEntry[] = [];
-      querySnapshot.forEach((doc) => {
-        userEntries.push({ id: doc.id, ...doc.data() } as JournalEntry);
-      });
-      setEntries(userEntries);
-      setLoadingEntries(false);
-    });
-
-    // Limpia el listener cuando el componente se desmonta o el usuario cambia.
-    return () => unsubscribe();
-  }, [user]);
-
-  if (!isLoggedIn) {
-    return (
-      <div className="text-center py-16">
-        <h1 className="text-2xl font-bold">Acceso Restringido</h1>
-        <p className="mt-4 text-gray-600">Debes iniciar sesión para ver tu progreso.</p>
-        <div className="mt-6">
-          <Button to="/">Volver al Inicio</Button>
-        </div>
-      </div>
-    );
-  }
-
-  const userMetrics = {
-    entries: entries.length,
-    sessions: 0, // Podrías calcular esto basado en las fechas de las entradas
-    tracking: 0, // Lógica a implementar
-  };
-  
-  const journalTips = [
-    "Escribe regularmente, incluso si son solo unas líneas",
-    "Sé honesto/a contigo mismo/a sobre tus emociones",
-    "Observa patrones en tus conflictos y resentires",
-    "Celebra los pequeños progresos y cambios positivos",
-    "Usa esta información para crecer y evolucionar emocionalmente",
-  ];
-
-  const handleSaveEntry = async () => {
-    if (!newEntryText.trim() || !user) return;
-
-    try {
-      // Añade un nuevo documento a la colección 'journalEntries'
-      await addDoc(collection(db, 'journalEntries'), {
-        userId: user.uid,
-        text: newEntryText,
-        createdAt: Timestamp.now(),
-      });
-      setNewEntryText('');
-      setIsWriting(false);
-    } catch (error) {
-      console.error("Error al guardar la entrada:", error);
-      alert("Hubo un error al guardar tu entrada. Inténtalo de nuevo.");
-    }
-  };
-
+// Componente para las tarjetas de estadísticas
+const StatCard: React.FC<StatCardProps> = ({ icon: Icon, label, value, color }) => {
   return (
-    <div className="bg-gradient-page-background -mx-4 sm:-mx-6 lg:-mx-8 -my-8 md:-my-12 px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-      <div className="max-w-4xl mx-auto space-y-12">
-        <section className="text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-brand-dark-blue">Mi Progreso Personal</h1>
-          <p className="mt-2 text-lg text-gray-500">Bienvenido/a, {user?.displayName}</p>
-          <p className="mt-4 max-w-2xl mx-auto text-gray-600">
-            Lleva un registro de tu evolución emocional y reflexiones
-          </p>
-        </section>
+    <div className="bg-white p-6 rounded-xl shadow-md flex items-center gap-4 w-full">
+      <div className={`rounded-lg p-3 ${color}`}>
+        <Icon className="text-white" size={24} />
+      </div>
+      <div>
+        <p className="text-2xl font-bold text-gray-800">{value}</p>
+        <p className="text-sm text-gray-500">{label}</p>
+      </div>
+    </div>
+  );
+};
 
-        <section className="grid md:grid-cols-3 gap-6">
-          <Card className="flex items-center justify-center gap-4 py-6">
-            <div className="p-3 rounded-full bg-purple-100">
-              <Calendar className="text-purple-500" size={24} />
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-brand-dark-blue">{userMetrics.entries}</p>
-              <p className="text-sm text-gray-500">Entradas totales</p>
-            </div>
-          </Card>
-          <Card className="flex items-center justify-center gap-4 py-6">
-            <div className="p-3 rounded-full bg-pink-100">
-              <Heart className="text-pink-500" size={24} />
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-brand-dark-blue">{userMetrics.sessions}</p>
-              <p className="text-sm text-gray-500">Sesiones trabajadas</p>
-            </div>
-          </Card>
-          <Card className="flex items-center justify-center gap-4 py-6">
-            <div className="p-3 rounded-full bg-green-100">
-              <TrendingUp className="text-green-500" size={24} />
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-brand-dark-blue">{userMetrics.tracking}</p>
-              <p className="text-sm text-gray-500">Sesiones de seguimiento</p>
-            </div>
-          </Card>
-        </section>
+// Componente para los consejos
+const TipItem: React.FC<TipItemProps> = ({ children }) => (
+  <li className="flex items-start gap-3">
+    <CheckCircle2 className="text-green-500 mt-1 flex-shrink-0" size={16} />
+    <span className="text-gray-600">{children}</span>
+  </li>
+);
 
-        <section className="text-center">
-          {!isWriting && (
-            <button
-              onClick={() => setIsWriting(true)}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-pink-500 to-purple-600 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-            >
+const MyProgress = () => {
+  return (
+    <>
+      <title>SentIA - Mi Progreso | Tu Diario Emocional</title>
+      <meta name="description" content="Lleva un registro de tu evolución con el diario emocional de SentIA. Anota tus reflexiones, observa patrones y celebra tu crecimiento personal y sanación." />
+      <div className="bg-gradient-to-b from-teal-50 to-white min-h-full">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Encabezado */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-800">Mi Progreso Personal</h1>
+            <p className="text-lg text-gray-600 mt-2">Bienvenido/a</p>
+            <p className="text-md text-gray-500">Lleva un registro de tu evolución emocional y reflexiones</p>
+          </div>
+
+          {/* Tarjetas de Estadísticas */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <StatCard icon={CalendarDays} label="Entradas totales" value={0} color="bg-purple-400" />
+            <StatCard icon={Heart} label="Sesiones trabajadas" value={0} color="bg-pink-400" />
+            <StatCard icon={TrendingUp} label="Sesiones de seguimiento" value={0} color="bg-green-400" />
+          </div>
+
+          {/* Botón de Nueva Entrada */}
+          <div className="text-center mb-10">
+            <button className="bg-brand-purple text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-opacity-90 transition-transform transform hover:scale-105 flex items-center gap-2 mx-auto">
               <Plus size={20} />
               Nueva Entrada del Diario
             </button>
-          )}
-        </section>
+          </div>
 
-        <section>
-          <Card className="w-full">
-            <div className="flex items-center gap-3 mb-4">
+          {/* Diario Emocional - Estado Vacío */}
+          <div className="bg-white rounded-xl shadow-lg p-8 mb-10">
+            <h2 className="text-xl font-semibold text-gray-700 mb-6 flex items-center gap-3">
               <BookOpen className="text-brand-purple" />
-              <h2 className="text-xl font-semibold text-brand-dark-blue">Tu Diario Emocional</h2>
+              Tu Diario Emocional
+            </h2>
+            <div className="text-center py-12 border-2 border-dashed rounded-lg">
+              <BookOpen className="mx-auto text-gray-300" size={48} />
+              <h3 className="mt-4 text-xl font-semibold text-gray-700">Aún no tienes entradas</h3>
+              <p className="mt-1 text-gray-500">Comienza tu diario emocional registrando tus reflexiones y evolución personal.</p>
             </div>
-            {isWriting ? (
-              <div>
-                <textarea
-                  value={newEntryText}
-                  onChange={(e) => setNewEntryText(e.target.value)}
-                  placeholder="¿Qué sientes hoy? ¿Qué has descubierto sobre ti?"
-                  className="w-full h-40 p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all"
-                ></textarea>
-                <div className="flex justify-end gap-4 mt-4">
-                   <button onClick={() => { setIsWriting(false); setNewEntryText(''); }} className="text-sm font-semibold text-gray-600 hover:text-gray-800">Cancelar</button>
-                   <Button onClick={handleSaveEntry}>Guardar Entrada</Button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {loadingEntries ? (
-                  <div className="text-center py-12 text-gray-500">Cargando entradas...</div>
-                ) : entries.length > 0 ? (
-                  entries.map(entry => (
-                    <div key={entry.id} className="bg-gray-50 p-4 rounded-lg border">
-                      <p className="text-sm text-gray-500 mb-2">{entry.createdAt.toDate().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                      <p className="text-gray-700 whitespace-pre-wrap">{entry.text}</p>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-lg">
-                    <BookOpen className="mx-auto h-12 w-12 text-gray-300" />
-                    <h3 className="mt-4 text-lg font-semibold text-gray-700">Aún no tienes entradas</h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      Comienza tu diario emocional registrando tus reflexiones y evolución personal.
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-          </Card>
-        </section>
-        
-        <section>
-           <Card className="bg-green-50/70 border border-green-200">
-            <div className="flex items-center gap-3">
-              <Lightbulb className="text-green-600" size={24} />
-              <h3 className="text-xl font-semibold text-green-800">Consejos para tu Diario Emocional</h3>
-            </div>
-            <ul className="mt-4 space-y-3">
-              {journalTips.map((tip, index) => (
-                 <li key={index} className="flex items-start gap-3 text-gray-700">
-                  <Target className="h-5 w-5 mt-0.5 flex-shrink-0 text-green-500" />
-                  <span>{tip}</span>
-                </li>
-              ))}
+          </div>
+
+          {/* Consejos */}
+          <div className="bg-green-50 border-2 border-green-200 rounded-xl p-8">
+            <h2 className="text-xl font-semibold text-gray-700 mb-6 flex items-center gap-3">
+              <Lightbulb className="text-green-500" />
+              Consejos para tu Diario Emocional
+            </h2>
+            <ul className="space-y-3">
+              <TipItem>Escribe regularmente, incluso si son solo unas líneas</TipItem>
+              <TipItem>Sé honesto/a contigo mismo/a sobre tus emociones</TipItem>
+              <TipItem>Observa patrones en tus conflictos y resentires</TipItem>
+              <TipItem>Celebra los pequeños progresos y cambios positivos</TipItem>
+              <TipItem>Usa esta información para crecer y evolucionar emocionalmente</TipItem>
             </ul>
-          </Card>
-        </section>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
