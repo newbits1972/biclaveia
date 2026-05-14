@@ -1,0 +1,43 @@
+﻿
+> vite-react-typescript-starter@0.0.0 lint
+> eslint .
+
+
+D:\app web\biclaveia\set-admin-role.cjs
+   1:15  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+   1:15  error  'require' is not defined                 no-undef
+   7:24  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+   7:24  error  'require' is not defined                 no-undef
+  18:5   error  'console' is not defined                 no-undef
+  19:5   error  'process' is not defined                 no-undef
+  24:26  error  'process' is not defined                 no-undef
+  27:3   error  'console' is not defined                 no-undef
+  28:3   error  'console' is not defined                 no-undef
+  29:3   error  'process' is not defined                 no-undef
+  34:5   error  'console' is not defined                 no-undef
+  37:5   error  'console' is not defined                 no-undef
+  39:7   error  'console' is not defined                 no-undef
+  40:7   error  'process' is not defined                 no-undef
+  43:5   error  'console' is not defined                 no-undef
+  46:5   error  'console' is not defined                 no-undef
+  47:5   error  'console' is not defined                 no-undef
+  49:5   error  'process' is not defined                 no-undef
+  52:7   error  'console' is not defined                 no-undef
+  54:7   error  'console' is not defined                 no-undef
+  56:5   error  'process' is not defined                 no-undef
+
+D:\app web\biclaveia\src\articles\articleData.ts
+  16:49  error  The `{}` ("empty object") type allows any non-nullish value, including literals like `0` and `""`.
+- If that's what you want, disable this lint rule with an inline comment or configure the 'allowObjectTypes' rule option.
+- If you want a type meaning "any object", you probably want `object` instead.
+- If you want a type meaning "any value", you probably want `unknown` instead  @typescript-eslint/no-empty-object-type
+
+D:\app web\biclaveia\src\articles\profesion-como-reparacion.tsx
+  2:43  error  'Stethoscope' is defined but never used  @typescript-eslint/no-unused-vars
+  2:56  error  'Scale' is defined but never used        @typescript-eslint/no-unused-vars
+
+D:\app web\biclaveia\src\components\ErrorBoundary.tsx
+  17:42  error  '_' is defined but never used  @typescript-eslint/no-unused-vars
+
+Ô£û 25 problems (25 errors, 0 warnings)
+

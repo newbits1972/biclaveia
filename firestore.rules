@@ -1,0 +1,38 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Regla General: Por defecto, nadie tiene acceso a nada.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // REGLAS DE ADMINISTRADOR
+    // El administrador tiene acceso total a toda la base de datos.
+    // Esto funciona verificando un "custom claim" en el token de autenticación del usuario.
+    match /{document=**} {
+      allow read, write, delete: if request.auth.token.admin == true;
+    }
+
+    // REGLAS PARA USUARIOS NORMALES (AUTENTICADOS)
+
+    // Los usuarios pueden leer y escribir en su propia colección de datos.
+    // Ejemplo: /users/[SU_UID]/progress/...
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth.uid == userId;
+    }
+
+    // REGLAS PÚBLICAS (CUALQUIER VISITANTE)
+
+    // Todos pueden leer la lista de profesionales.
+    match /professionals/{professionalId} {
+      allow read: if true;
+    }
+
+    // Todos pueden leer el diccionario.
+    match /dictionary/{termId} {
+      allow read: if true;
+    }
+  }
+}
