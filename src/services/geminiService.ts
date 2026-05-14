@@ -6,11 +6,10 @@ import { z } from "zod";
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-if (!API_KEY) {
-    throw new Error("La clave de API de Gemini no está configurada. Por favor, añádela a tu archivo .env.local");
+let genAI: GoogleGenerativeAI | null = null;
+if (API_KEY) {
+    genAI = new GoogleGenerativeAI(API_KEY);
 }
-
-const genAI = new GoogleGenerativeAI(API_KEY);
 
 const generationConfig = {
     temperature: 0.7,
@@ -38,6 +37,9 @@ REGLAS OBLIGATORIAS:
 `;
 
 async function generateContentWithGemini<T extends z.ZodTypeAny>(prompt: string, schema: T): Promise<z.infer<T>> {
+    if (!genAI) {
+        throw new Error("La clave de API de Gemini no está configurada. Por favor, añádela a tu archivo .env.");
+    }
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig, safetySettings });
 
     try {
@@ -71,27 +73,29 @@ async function generateContentWithGemini<T extends z.ZodTypeAny>(prompt: string,
 
 export const analizarSintoma = (sintoma: string, problema: string, emocion: string) => {
     const prompt = `
-    Eres un experto senior en Biodescodificación y Psicosomática Clínica. Tu objetivo es realizar un análisis profundo y preciso de la relación mente-cuerpo basada en la consulta del usuario.
+    Eres un experto senior en Biodescodificación y Psicosomática Clínica, especializado en las 5 Leyes Biológicas del Dr. Hamer. Tu objetivo es realizar un análisis profundo, preciso y revelador sobre la consulta del usuario.
     
     Información del Usuario:
     *   Síntoma/Enfermedad: ${sintoma}
-    *   Problema/Situación actual: ${problema}
-    *   Emoción persistente: ${emocion}
+    *   Situación/Conflicto actual: ${problema}
+    *   Sentir/Emoción predominante: ${emocion}
     
-    Instrucciones de Análisis:
-    1. Identifica el conflicto biológico raíz (el "bioshock").
-    2. Explica el sentido biológico del síntoma (¿para qué sirve este síntoma a nivel evolutivo?).
-    3. Conecta la emoción declarada con la función orgánica afectada.
+    Instrucciones Técnicas de Análisis:
+    1. **Fase Biológica**: Identifica si el síntoma corresponde a la Fase Activa o Fase de Curación (PCL).
+    2. **Capa Embrionaria**: Indica si el tejido afectado proviene del Endodermo (supervivencia), Mesodermo Antiguo (protección), Mesodermo Nuevo (valoración) o Ectodermo (relación/territorio).
+    3. **Conflicto Raíz**: Define el "DHS" (Dirk Hamer Syndrome) o bioshock específico que disparó el programa biológico.
+    4. **Sentido Biológico**: Explica detalladamente el "para qué" de la solución biológica que el cuerpo ha implementado.
+    5. **Transgeneracional**: Sugiere una posible conexión con lealtades familiares o memorias de ancestros que se estén expresando a través de este síntoma.
     
     Formato de Respuesta (JSON):
     {
-      "hipotesisConflicto": "Una explicación detallada y técnica del conflicto emocional asociado, mencionando la posible capa embrionaria y el resentir específico.",
+      "hipotesisConflicto": "Una explicación técnica y profunda del conflicto emocional, mencionando la capa embrionaria y el resentir específico. Usa un lenguaje profesional pero comprensible.",
       "preguntasReflexion": [
-        "Pregunta poderosa que cuestione la percepción actual.",
-        "Pregunta que invite a buscar el evento desencadenante.",
-        "Pregunta sobre la ganancia secundaria o lealtad familiar."
+        "Pregunta de precisión quirúrgica para localizar el momento del bioshock.",
+        "Pregunta para identificar el beneficio secundario o la lealtad inconsciente.",
+        "Pregunta para cuestionar la percepción de la realidad actual."
       ],
-      "perspectivaAprendizaje": "Un mensaje empoderador que transforme el síntoma en un camino de evolución personal."
+      "perspectivaAprendizaje": "Un mensaje transformador y místico que convierta el síntoma en una oportunidad de evolución y liberación de la memoria celular."
     }
     ${JSON_PROMPT_RULES}
     `;
@@ -201,11 +205,11 @@ export const realizarTiradaTarot = (nombre: string, fechaNacimiento: string, pre
     Formato de Respuesta (JSON):
     {
       "cartas": [
-        { "nombre": "Nombre del Arcano", "posicion": "Pasado", "significado": "Explicación profunda del origen del conflicto o situación." },
-        { "nombre": "Nombre del Arcano", "posicion": "Presente", "significado": "Análisis del desafío actual y la energía a trabajar." },
-        { "nombre": "Nombre del Arcano", "posicion": "Futuro", "significado": "Visión evolutiva y recomendación para el camino a seguir." }
+        { "nombre": "Nombre del Arcano", "posicion": "Pasado", "significado": "Análisis del origen transgeneracional o vivencial. ¿Qué semilla se plantó?" },
+        { "nombre": "Nombre del Arcano", "posicion": "Presente", "significado": "La energía actual. El bloqueo o recurso que se está manifestando ahora." },
+        { "nombre": "Nombre del Arcano", "posicion": "Futuro", "significado": "La síntesis evolutiva. Hacia dónde se dirige el alma si se integra el aprendizaje." }
       ],
-      "conclusionGeneral": "Una síntesis magistral que unifique el mensaje de las tres cartas y ofrezca una guía espiritual clara."
+      "conclusionGeneral": "Una canalización magistral que unifique el hilo conductor de la tirada, ofreciendo una guía espiritual y práctica para la sanación."
     }
     ${JSON_PROMPT_RULES}
     `;

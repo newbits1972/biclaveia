@@ -87,10 +87,14 @@ const TiradaTarot = () => {
 
   return (
     <div 
-      className="w-full min-h-screen text-white overflow-x-hidden pb-20 bg-cover bg-center bg-fixed"
-      style={{ backgroundImage: `url('/assets/background-tarot.png')` }}
+      className="w-full min-h-screen text-white overflow-x-hidden pb-20 relative bg-[#1a0b2e]"
+      style={{ 
+        background: `radial-gradient(circle at center, #4a2c7a 0%, #1a0b2e 100%)`,
+      }}
     >
-      <div className="w-full min-h-screen bg-black/50">
+      {/* Capa de Ruido/Textura */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+
         <header className="text-center pt-12 mb-4 animate-in fade-in duration-1000">
           <h1 className="text-4xl md:text-6xl font-serif font-bold bg-gradient-to-b from-amber-200 to-amber-500 bg-clip-text text-transparent tracking-tighter">
             Templo de Marsella
@@ -122,23 +126,20 @@ const TiradaTarot = () => {
               </form>
             </div>
           </div>
-        )}
-
-        {step === 'seleccion' && (
-          <div className="relative w-full" style={{ height: 'calc(100vh - 120px)' }}>
-
+               {step === 'seleccion' && (
+          <div className="flex flex-col items-center justify-start min-h-[80vh] pt-10 px-4">
             {/* SECCIÓN SUPERIOR - CARTAS SELECCIONADAS */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl text-center z-20 px-4">
-               <p className="text-2xl font-serif italic text-amber-100 mb-6">Elige 3 cartas, {nombre}...</p>
+            <div className="w-full max-w-2xl text-center z-20 mb-12">
+               <p className="text-3xl font-serif italic text-amber-100 mb-8 animate-pulse">Elige 3 cartas, {nombre}...</p>
                <div className="flex gap-6 justify-center">
-                  {[0,1,2].map(i => (
-                    <div key={i} className={`relative w-32 h-[250px] rounded-lg border-2 transition-all duration-700 overflow-hidden ${seleccionadas[i] ? 'border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.5)]' : 'border-white/10 bg-black/20'}`}>
+                     {[0,1,2].map(i => (
+                    <div key={i} className={`relative w-20 h-[140px] rounded-xl border-2 transition-all duration-700 overflow-hidden ${seleccionadas[i] ? 'border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.6)] scale-110' : 'border-white/10 bg-black/40 backdrop-blur-md'}`}>
                       {seleccionadas[i] && <img src={getImgPath(seleccionadas[i].arcano.slug)} className="w-full h-full object-cover" alt="carta" />}
                       {!seleccionadas[i] && (
                           <div className="absolute inset-0 flex items-center justify-center">
-                               <span className="text-sm font-bold text-white/20 uppercase tracking-widest">
+                               <span className="text-[10px] font-bold text-white/10 uppercase tracking-[0.3em] rotate-[-90deg]">
                                   {i === 0 ? 'Pasado' : i === 1 ? 'Presente' : 'Futuro'}
-                               </span>
+                                </span>
                           </div>
                       )}
                     </div>
@@ -147,7 +148,8 @@ const TiradaTarot = () => {
             </div>
 
             {/* SECCIÓN INFERIOR - ABANICO DE CARTAS */}
-            <div className="absolute bottom-0 left-0 w-full h-[500px] flex justify-center items-end overflow-visible">
+            <div className="relative w-full h-[350px] flex justify-center items-end overflow-visible mt-4">
+
               {mazo.map((arcano, idx) => {
                 const isSelected = seleccionadas.some(s => s.index === idx);
                 const total = mazo.length;
@@ -160,13 +162,15 @@ const TiradaTarot = () => {
                     onClick={() => seleccionarCarta(arcano, idx)}
                     style={{
                       position: 'absolute',
-                      transformOrigin: 'bottom center',
-                      transform: `rotate(${angle}deg) translateY(${isSelected ? '-250px' : '0'})`,
-                      transition: 'all 0.5s cubic-bezier(0.23, 1, 0.32, 1)',
-                      zIndex: isSelected ? 100 : idx,
-                      left: 'calc(50% - 80px)' // w-40 is 160px, so 160/2 = 80px
+                      transformOrigin: '50% 150%',
+                      transform: `rotate(${angle}deg) translateY(${isSelected ? '-300px' : '0'}) scale(${isSelected ? 0 : 1})`,
+                      opacity: isSelected ? 0 : 1,
+                      transition: 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                      zIndex: idx,
+                      left: 'calc(50% - 48px)'
                     }}
-                    className={`flip-card w-40 h-[312px] ${isSelected ? 'flipped' : 'hover:-translate-y-10 cursor-pointer'} ${isLoading ? 'pointer-events-none' : ''}`}>
+                    className={`w-24 h-[160px] ${!isSelected && 'hover:-translate-y-12 cursor-pointer'} ${isLoading ? 'pointer-events-none' : ''}`}>
+
                     <div className="flip-card-inner">
                       <div className="flip-card-front bg-black/50 border-2 border-amber-900 shadow-2xl rounded-xl flex items-center justify-center overflow-hidden">
                          <img src="/assets/reverso-carta.jpg" className="w-full h-full object-cover" alt="Reverso de la carta" />
@@ -187,19 +191,27 @@ const TiradaTarot = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-16">
               {resultado.cartas.map((carta, index) => {
                 const arcanoInfo = ARCANOS_MAYORES.find(a => a.nombre.toLowerCase() === carta.nombre.toLowerCase());
+                const rotation = index === 0 ? -15 : index === 2 ? 15 : 0;
+                const translateY = index === 1 ? -20 : 0;
+                
                 return (
-                  <div key={index} className="flex flex-col items-center group">
+                  <div 
+                    key={index} 
+                    className="flex flex-col items-center group transition-transform duration-700 hover:z-50"
+                    style={{ transform: `rotate(${rotation}deg) translateY(${translateY}px)` }}
+                  >
                     <div className="mb-4 text-[10px] font-black text-amber-500 uppercase tracking-[0.5em]">{carta.posicion}</div>
-                    <div className="w-64 aspect-[327/640] relative rounded-2xl overflow-hidden shadow-2xl border-4 border-amber-500/30 group-hover:border-amber-500 transition-all duration-500 bg-black">
+                    <div className="w-36 aspect-[327/640] relative rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)] border-4 border-amber-500/20 group-hover:border-amber-500 group-hover:shadow-[0_0_40px_rgba(245,158,11,0.3)] transition-all duration-500 bg-black">
                       {arcanoInfo && <img src={getImgPath(arcanoInfo.slug)} className="w-full h-full object-cover" alt={carta.nombre} />}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60"></div>
-                      <div className="absolute bottom-6 inset-x-0 text-center text-xl font-serif font-bold tracking-tight">{carta.nombre}</div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                      <div className="absolute bottom-4 inset-x-0 text-center text-lg font-serif font-bold tracking-tight text-amber-100">{carta.nombre}</div>
                     </div>
-                    <div className="mt-8 bg-black/20 backdrop-blur-sm p-6 rounded-2xl border border-white/5 text-center italic text-amber-100/80 leading-relaxed min-h-[120px] flex items-center">
+                    <div className="mt-8 bg-black/40 backdrop-blur-md p-6 rounded-2xl border border-white/10 text-center italic text-amber-50/90 leading-relaxed min-h-[120px] flex items-center shadow-xl max-w-[280px]">
                       "{carta.significado}"
                     </div>
                   </div>
                 );
+
               })}
             </div>
 
@@ -219,15 +231,15 @@ const TiradaTarot = () => {
           </div>
         )}
 
-        {isLoading && (
-          <div className="fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center">
-            <div className="w-32 h-32 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mb-8"></div>
-            <p className="text-3xl font-serif italic text-amber-200 animate-pulse">Los Arcanos están revelando tu camino...</p>
-          </div>
-        )}
-      </div>
+      {isLoading && (
+        <div className="fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center">
+          <div className="w-32 h-32 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mb-8"></div>
+          <p className="text-3xl font-serif italic text-amber-200 animate-pulse">Los Arcanos están revelando tu camino...</p>
+        </div>
+      )}
     </div>
   );
 };
 
 export default TiradaTarot;
+
