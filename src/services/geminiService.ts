@@ -38,7 +38,7 @@ REGLAS OBLIGATORIAS:
 `;
 
 async function generateContentWithGemini<T extends z.ZodTypeAny>(prompt: string, schema: T): Promise<z.infer<T>> {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig, safetySettings });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig, safetySettings });
 
     try {
         const result = await model.generateContent(prompt);
@@ -71,17 +71,27 @@ async function generateContentWithGemini<T extends z.ZodTypeAny>(prompt: string,
 
 export const analizarSintoma = (sintoma: string, problema: string, emocion: string) => {
     const prompt = `
-    Eres un experto en biodescodificación y análisis transgeneracional.
-    Tu objetivo es analizar la información proporcionada por el usuario y ofrecer una interpretación basada en estas disciplinas.
+    Eres un experto senior en Biodescodificación y Psicosomática Clínica. Tu objetivo es realizar un análisis profundo y preciso de la relación mente-cuerpo basada en la consulta del usuario.
+    
     Información del Usuario:
     *   Síntoma/Enfermedad: ${sintoma}
     *   Problema/Situación actual: ${problema}
     *   Emoción persistente: ${emocion}
+    
+    Instrucciones de Análisis:
+    1. Identifica el conflicto biológico raíz (el "bioshock").
+    2. Explica el sentido biológico del síntoma (¿para qué sirve este síntoma a nivel evolutivo?).
+    3. Conecta la emoción declarada con la función orgánica afectada.
+    
     Formato de Respuesta (JSON):
     {
-      "hipotesisConflicto": "...",
-      "preguntasReflexion": ["...", "...", "..."],
-      "perspectivaAprendizaje": "..."
+      "hipotesisConflicto": "Una explicación detallada y técnica del conflicto emocional asociado, mencionando la posible capa embrionaria y el resentir específico.",
+      "preguntasReflexion": [
+        "Pregunta poderosa que cuestione la percepción actual.",
+        "Pregunta que invite a buscar el evento desencadenante.",
+        "Pregunta sobre la ganancia secundaria o lealtad familiar."
+      ],
+      "perspectivaAprendizaje": "Un mensaje empoderador que transforme el síntoma en un camino de evolución personal."
     }
     ${JSON_PROMPT_RULES}
     `;
@@ -90,16 +100,24 @@ export const analizarSintoma = (sintoma: string, problema: string, emocion: stri
 
 export const realizarAnalisisCompleto = (historial: z.infer<typeof HistorialAnalisisSchema>) => {
     const prompt = `
-    Eres un asistente de IA especializado en biodescodificación y análisis de patrones emocionales.
-    Analiza el siguiente historial de análisis de un usuario para identificar patrones, conexiones y ofrecer una visión más profunda.
+    Eres un Analista Transgeneracional y Terapeuta Sistémico experto en detección de patrones de comportamiento y ciclos celulares biológicos memorizados.
+    
+    Tarea: Analiza el historial de consultas del usuario para encontrar hilos conductores, repeticiones de conflictos y la 'meta-narrativa' de su síntoma actual.
+    
     Historial del Usuario:
     ${JSON.stringify(historial.analisis, null, 2)}
+    
+    Instrucciones:
+    - Identifica si los conflictos se repiten en diferentes áreas (ej: desvalorización en el trabajo y en la pareja).
+    - Sugiere posibles conexiones con el árbol genealógico (Sindrome del Yaciente, Dobles, Herederos Universales).
+    - Crea una narrativa de sanación que integre todos los hallazgos previos.
+    
     Formato de Respuesta (JSON):
     {
-      "patronesRecurrentes": "...",
-      "conexionTransgeneracional": "...",
-      "narrativaSanacion": "...",
-      "afirmacionPositiva": "..."
+      "patronesRecurrentes": "Análisis exhaustivo de las recurrencias emocionales y situacionales detectadas.",
+      "conexionTransgeneracional": "Hipótesis sobre cómo estos patrones podrían ser herencias de ancestros o lealtades invisibles.",
+      "narrativaSanacion": "Un relato transformador que dé sentido a todo el proceso del usuario.",
+      "afirmacionPositiva": "Una frase de poder única y personalizada para romper el patrón identificado."
     }
     ${JSON_PROMPT_RULES}
     `;
@@ -108,42 +126,48 @@ export const realizarAnalisisCompleto = (historial: z.infer<typeof HistorialAnal
 
 export const runFullAnalysis = (searchTerm: string): Promise<AnalysisResult> => {
     const prompt = `
-    Eres una IA experta y mentora en múltiples disciplinas de sanación y autoconocimiento.
-    Tu propósito es ofrecer un análisis holístico y profundo sobre la consulta de un usuario.
-    Consulta del Usuario: "${searchTerm}"
-    Instrucciones de Análisis y Estructura de Respuesta JSON:
-    Analiza la consulta y responde SIEMPRE con el siguiente formato JSON. Sé profundo, sabio y empático.
+    Eres una IA de élite, mentora y experta en sanación holística con décadas de experiencia en Bio-Psico-Somática (basada en las leyes biológicas de Hamer), Biodescodificación (estilo Corbera/Fleischner), Análisis Transgeneracional, Constelaciones Familiares y Coaching Ontológico.
+    
+    Tu propósito es ofrecer un análisis sumamente preciso, profesional y revelador sobre la consulta: "${searchTerm}".
+    
+    INSTRUCCIONES TÉCNICAS:
+    1. **Biodescodificación**: Identifica con precisión la capa embrionaria afectada (Endodermo, Mesodermo, Ectodermo). Define el conflicto específico (ej: Desvalorización, Separación, Territorio, Identidad). Explica la 'utilidad biológica' (el sentido de supervivencia) de la dolencia.
+    2. **Constelaciones Familiares**: Analiza posibles implicancias sistémicas (excluidos, jerarquías rotas, lealtades invisibles).
+    3. **Coaching**: Identifica el lenguaje limitante y ofrece un cambio de observador.
+    4. **Simbolismo**: Explica el significado arquetípico del órgano o situación consultada.
+    
+    Formato de Respuesta (JSON):
     {
       "perspectivaIntegral": {
-        "tituloImpactante": "Crea un título poético y revelador para el análisis.",
-        "mensajeCentral": "Resume en 1-2 párrafos el núcleo del conflicto o situación, conectando el síntoma/emoción con su propósito evolutivo. ¿Qué lección fundamental hay aquí?",
-        "simbolismoProfundo": "Explora el simbolismo del síntoma, órgano o situación. ¿Qué representa a un nivel más profundo o arquetípico?"
+        "tituloImpactante": "Crea un título poético, técnico y revelador.",
+        "mensajeCentral": "Resumen magistral del propósito evolutivo de la consulta. Sé profundo y empático.",
+        "simbolismoProfundo": "Análisis arquetípico y metafórico detallado."
       },
       "desglosePorDisciplinas": {
         "biodescodificacion": {
-          "conflictoEmocional": "Identifica el conflicto emocional raíz desde la biodescodificación (ej. 'Conflicto de desvalorización en el territorio').",
-          "utilidadBiologica": "Explica la 'lógica' o 'utilidad' biológica del síntoma como una adaptación a ese conflicto."
+          "conflictoEmocional": "Descripción técnica del conflicto emocional raíz y el resentir biológico.",
+          "utilidadBiologica": "Explicación del 'para qué' biológico según la capa embrionaria involucrada."
         },
         "constelacionesFamiliares": {
-          "implicanciaSistemica": "Plantea una hipótesis sobre cómo esta situación podría estar conectada con una dinámica o lealtad familiar inconsciente (ej. 'Reparación de un ancestro excluido', 'Lealtad a un destino difícil').",
-          "preguntaSanadora": "Formula una pregunta poderosa y sanadora que el usuario pueda hacerse para tomar conciencia de la implicancia sistémica."
+          "implicanciaSistemica": "Hipótesis sobre dinámicas familiares o transgeneracionales heredadas.",
+          "preguntaSanadora": "Una pregunta que confronte amorosamente la lealtad inconsciente."
         },
         "coachingYMentalHealing": {
-          "creenciasLimitantes": ["Identifica 1 o 2 creencias limitantes clave que podrían estar sosteniendo el problema."],
-          "preguntasDeCoaching": ["Formula 2-3 preguntas de coaching ontológico, enfocadas en la posibilidad y el futuro.", "Evita preguntas que busquen el 'por qué' y enfócate en el 'para qué' o 'cómo'."],
-          "afirmacionEmpoderadora": "Crea una afirmación positiva en primera persona, potente y que contrarreste la creencia limitante."
+          "creenciasLimitantes": ["Menciona creencias específicas que sostienen el síntoma."],
+          "preguntasDeCoaching": ["Preguntas que abran nuevas posibilidades de acción y percepción."],
+          "afirmacionEmpoderadora": "Una declaración potente para reprogramar el subconsciente."
         },
         "tarotSistemico": {
-          "arquetipoPrincipal": "Asocia la situación con un Arcano Mayor del Tarot que represente el arquetipo central del aprendizaje.",
-          "consejoDelTarot": "Ofrece un consejo breve y sabio inspirado en la energía de ese arquetipo."
+          "arquetipoPrincipal": "El Arcano Mayor que mejor representa el aprendizaje de este proceso.",
+          "consejoDelTarot": "Sabiduría práctica basada en la energía del arcano."
         }
       },
       "planDeAccionConsciente": {
-        "pasosParaLaTomaDeConciencia": ["Define 2-3 pasos iniciales, claros y realizables que el usuario puede tomar.", "Estos deben ser ejercicios de introspección o pequeñas acciones simbólicas."],
+        "pasosParaLaTomaDeConciencia": ["Acciones concretas, rituales simbólicos o ejercicios de introspección."],
         "recursosSugeridos": {
-          "lecturas": ["Sugiere 1-2 títulos de libros relevantes (autor y título)."],
-          "practicas": ["Sugiere 1-2 prácticas o terapias complementarias (ej. 'Meditación Mindfulness', 'Constelaciones Familiares', 'Terapia Gestalt')."],
-          "profundizacion": ["Sugiere un tema o área para seguir investigando (ej. 'Explorar el árbol genealógico', 'Indagar sobre la herida de abandono')."]
+          "lecturas": ["Libros clave de autores reconocidos en la materia."],
+          "practicas": ["Terapias o ejercicios recomendados (ej: carta de duelo, actos simbólicos)."],
+          "profundizacion": ["Áreas específicas para investigar en su propia historia."]
         }
       }
     }
@@ -154,35 +178,34 @@ export const runFullAnalysis = (searchTerm: string): Promise<AnalysisResult> => 
 
 export const realizarTiradaTarot = (nombre: string, fechaNacimiento: string, pregunta: string, cartasSeleccionadas: string[]) => {
     const prompt = `
-    Eres un tarotista experto, sabio y profundo, especializado en el Tarot de Marsella.
-    Tu objetivo es realizar una tirada de Tarot evolutivo de tres cartas (Pasado, Presente, Futuro) para el consultante, basada en su pregunta o intención específica.
-    Para que la lectura sea personalizada y precisa, utiliza la vibración del nombre y la fecha de nacimiento para sintonizar con la energía del usuario.
-
+    Eres un Gran Maestro de Tarot Terapéutico y Evolutivo, experto en la simbología sagrada del Tarot de Marsella.
+    Tu objetivo es realizar una lectura profunda que no solo responda a la pregunta, sino que ilumine el camino de crecimiento del consultante.
+    
     Datos del Consultante:
     - Nombre: ${nombre}
     - Fecha de Nacimiento: ${fechaNacimiento}
+    - Consulta: "${pregunta}"
     
-    Consulta o Intención: "${pregunta}"
-
-    EL USUARIO HA SELECCIONADO ESTAS TRES CARTAS ESPECÍFICAS (Arcanos Mayores del Tarot de Marsella):
-    1. Pasado: ${cartasSeleccionadas[0]}
-    2. Presente: ${cartasSeleccionadas[1]}
-    3. Futuro: ${cartasSeleccionadas[2]}
-
-    Instrucciones de la Tirada:
-    1. Utiliza exclusivamente los 22 Arcanos Mayores del Tarot de Marsella para tu interpretación.
-    2. Debes interpretar EXACTAMENTE las cartas seleccionadas por el usuario en las posiciones indicadas.
-    3. Para cada carta, proporciona su nombre exacto, la posición y un significado profundo, conectándolo con los datos del consultante y su pregunta.
-    4. Finaliza con una conclusión general que sintetice el mensaje de las tres cartas y ofrezca un consejo sabio y práctico para el usuario.
-
-    Formato de Respuesta (JSON estricto):
+    CARTAS SELECCIONADAS (Arcanos Mayores):
+    1. Pasado (Origen/Causa): ${cartasSeleccionadas[0]}
+    2. Presente (Situación actual/Desafío): ${cartasSeleccionadas[1]}
+    3. Futuro (Evolución/Consejo): ${cartasSeleccionadas[2]}
+    
+    Instrucciones de Interpretación:
+    - Sintoniza con la vibración numérica y simbólica de las cartas.
+    - Para el Pasado: Explica qué energía o evento originó la situación actual.
+    - Para el Presente: Describe el aprendizaje principal que el consultante debe integrar AHORA.
+    - Para el Futuro: Muestra la tendencia evolutiva si se integra el consejo del arcano.
+    - Mantén un tono sabio, místico pero práctico, y sumamente empático.
+    
+    Formato de Respuesta (JSON):
     {
       "cartas": [
-        { "nombre": "Nombre del Arcano", "posicion": "Pasado", "significado": "..." },
-        { "nombre": "Nombre del Arcano", "posicion": "Presente", "significado": "..." },
-        { "nombre": "Nombre del Arcano", "posicion": "Futuro", "significado": "..." }
+        { "nombre": "Nombre del Arcano", "posicion": "Pasado", "significado": "Explicación profunda del origen del conflicto o situación." },
+        { "nombre": "Nombre del Arcano", "posicion": "Presente", "significado": "Análisis del desafío actual y la energía a trabajar." },
+        { "nombre": "Nombre del Arcano", "posicion": "Futuro", "significado": "Visión evolutiva y recomendación para el camino a seguir." }
       ],
-      "conclusionGeneral": "..."
+      "conclusionGeneral": "Una síntesis magistral que unifique el mensaje de las tres cartas y ofrezca una guía espiritual clara."
     }
     ${JSON_PROMPT_RULES}
     `;
