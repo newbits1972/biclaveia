@@ -126,7 +126,9 @@ const TiradaTarot = () => {
               </form>
             </div>
           </div>
-               {step === 'seleccion' && (
+        )}
+
+        {step === 'seleccion' && (
           <div className="flex flex-col items-center justify-start min-h-[80vh] pt-10 px-4">
             {/* SECCIÓN SUPERIOR - CARTAS SELECCIONADAS */}
             <div className="w-full max-w-2xl text-center z-20 mb-12">
