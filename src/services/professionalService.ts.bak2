@@ -1,0 +1,61 @@
+import { collection, addDoc, getDocs, query, orderBy } from 'firebase/firestore';
+import { db } from '../firebase'; // Importa la instancia de Firestore
+
+// Define la estructura de datos que esperamos de Firestore
+export interface Professional {
+  id: string;
+  name: string;
+  specialty: string;
+  imageUrl?: string; // La imagen es opcional
+}
+
+// Define la estructura para crear un nuevo profesional (sin el id)
+interface ProfessionalData {
+  name: string;
+  specialty: string;
+  imageUrl: string;
+}
+
+// Referencia a la colección 'professionals' en Firestore
+const professionalsCollection = collection(db, 'professionals');
+
+/**
+ * Añade un nuevo documento de profesional a la colección 'professionals'.
+ * @param professionalData - Un objeto con los datos del profesional.
+ */
+export const addProfessional = async (professionalData: ProfessionalData) => {
+  try {
+    const docRef = await addDoc(professionalsCollection, { 
+      ...professionalData,
+      createdAt: new Date() // Añadimos un timestamp para ordenar
+    });
+    return docRef;
+  } catch (error) {
+    console.error('Error al escribir en Firestore:', error);
+    throw new Error('No se pudo añadir el profesional a la base de datos.');
+  }
+};
+
+/**
+ * Obtiene todos los profesionales de la colección, ordenados por fecha de creación.
+ */
+export const getProfessionals = async (): Promise<Professional[]> => {
+  try {
+    // Creamos una consulta para ordenar los profesionales por fecha de creación descendente
+    const q = query(professionalsCollection, orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    
+    const professionalsList: Professional[] = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      name: doc.data().name,
+      specialty: doc.data().specialty,
+      imageUrl: doc.data().imageUrl
+    }));
+
+    return professionalsList;
+
+  } catch (error) {
+    console.error('Error al leer de Firestore:', error);
+    throw new Error('No se pudieron obtener los profesionales.');
+  }
+};

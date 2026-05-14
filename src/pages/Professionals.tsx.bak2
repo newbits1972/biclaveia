@@ -1,0 +1,131 @@
+import { useState, useEffect } from 'react';
+import { Shield, User, Loader2, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { getProfessionals, Professional } from '../services/professionalService';
+
+// --- Componente de la Tarjeta de Profesional ---
+const ProfessionalCard: React.FC<{ professional: Professional }> = ({ professional }) => {
+  return (
+    <div className="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300">
+      <div className="h-40 bg-gray-200 flex items-center justify-center">
+        {professional.imageUrl ? (
+          <img src={professional.imageUrl} alt={professional.name} className="h-full w-full object-cover" />
+        ) : (
+          <User className="h-16 w-16 text-gray-400" />
+        )}
+      </div>
+      <div className="p-6">
+        <h3 className="text-xl font-bold text-brand-dark-blue">{professional.name}</h3>
+        <p className="text-gray-600 mt-1">{professional.specialty}</p>
+        <button className="mt-4 w-full bg-brand-purple text-white font-semibold py-2 px-4 rounded-md hover:bg-brand-dark-blue transition-colors">
+          Contactar
+        </button>
+      </div>
+    </div>
+  );
+};
+
+
+const Professionals = () => {
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProfessionals = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getProfessionals();
+        setProfessionals(data);
+        setError(null);
+      } catch (err) {
+        setError('Ocurrió un error al cargar los profesionales. Por favor, intenta de nuevo más tarde.');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfessionals();
+  }, []);
+
+  // --- Renderizado del contenido de la lista de profesionales ---
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex flex-col items-center justify-center text-center p-10">
+          <Loader2 className="animate-spin h-12 w-12 text-brand-purple" />
+          <p className="mt-4 text-gray-600">Cargando profesionales...</p>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-r-lg flex items-center gap-4">
+          <AlertTriangle className="h-8 w-8 text-red-500" />
+          <div>
+            <h4 className="font-bold text-red-800">Error</h4>
+            <p className="text-red-700">{error}</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (professionals.length === 0) {
+      return (
+        <div className="text-center p-10 bg-gray-50 rounded-lg">
+          <h3 className="text-xl font-semibold text-gray-700">No hay profesionales disponibles</h3>
+          <p className="mt-2 text-gray-500">Pronto añadiremos nuevos perfiles. ¡Vuelve a consultar más tarde!</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {professionals.map(prof => (
+          <ProfessionalCard key={prof.id} professional={prof} />
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className="bg-gray-50 -mx-4 sm:-mx-6 lg:-mx-8 -my-8 md:-my-12 px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <div className="max-w-5xl mx-auto space-y-12">
+        
+        <section className="text-center space-y-4">
+          <div>
+            <h1 className="text-4xl md:text-5xl font-bold text-brand-dark-blue">Soporte Profesional</h1>
+            <p className="mt-2 max-w-2xl mx-auto text-lg text-gray-600">
+              Conecta con profesionales especializados para acompañarte en tu proceso.
+            </p>
+          </div>
+          <div className="max-w-3xl mx-auto bg-teal-50 border-l-4 border-teal-300 p-4 rounded-r-lg text-left flex items-center gap-4">
+            <Shield className="text-teal-500 h-8 w-8 flex-shrink-0" />
+            <p className="text-sm text-teal-800">
+              Los profesionales listados aquí trabajan de forma independiente. Esta plataforma sirve como un punto de conexión para facilitar el contacto.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h2 className="text-3xl font-bold text-center text-brand-dark-blue mb-8">Profesionales Disponibles</h2>
+          {renderContent()}
+        </section>
+
+        <section className="bg-blue-50 border-l-4 border-blue-300 p-6 rounded-r-lg">
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="h-6 w-6 text-blue-500" />
+            <h3 className="text-lg font-bold text-blue-800">Recordatorio Importante</h3>
+          </div>
+          <p className="text-sm text-blue-700 mt-2">
+            La biodescodificación es una herramienta complementaria para el crecimiento personal. No reemplaza la atención médica o psicológica convencional. Consulta siempre a un profesional de la salud para cualquier condición médica.
+          </p>
+        </section>
+
+      </div>
+    </div>
+  );
+};
+
+export default Professionals;
