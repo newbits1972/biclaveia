@@ -92,8 +92,8 @@ const TiradaTarot = () => {
         background: `radial-gradient(circle at center, #4a2c7a 0%, #1a0b2e 100%)`,
       }}
     >
-      {/* Capa de Ruido/Textura */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+      {/* Capa de Ruido/Textura - Embebida para evitar 404 */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3F%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}></div>
 
         <header className="text-center pt-12 mb-4 animate-in fade-in duration-1000">
           <h1 className="text-4xl md:text-6xl font-serif font-bold bg-gradient-to-b from-amber-200 to-amber-500 bg-clip-text text-transparent tracking-tighter">
